@@ -1,91 +1,80 @@
 "use client";
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, BookOpen, Heart, Zap } from 'lucide-react';
-import { APP_NAME, APP_TAGLINE, APP_DESCRIPTION } from '@/lib/constants';
+import { Sparkles } from 'lucide-react';
 
-export default function OnboardingPage() {
+export default function WelcomeScreen() {
   const router = useRouter();
-  const [step, setStep] = useState(0);
-
-  const features = [
-    {
-      icon: BookOpen,
-      title: "Seu Refúgio Sagrado",
-      description: "No mesmo celular das distrações, um espaço só para Qur'an e paz interior"
-    },
-    {
-      icon: Heart,
-      title: "Plano Personalizado",
-      description: "Em 60 segundos, criamos um caminho de Qur'an feito especialmente para você"
-    },
-    {
-      icon: Zap,
-      title: "Hábitos Reais",
-      description: "Sessões de 3-5 minutos que cabem na sua rotina, sem culpa, só progresso"
-    }
-  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50 flex flex-col">
-      {/* Header */}
-      <header className="p-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-lg mb-4">
-          <Sparkles className="w-5 h-5 text-emerald-600" />
-          <span className="font-bold text-2xl text-gray-900">{APP_NAME}</span>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-indigo-950 to-slate-900 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+      
+      {/* Efeito de brilho sutil no fundo */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent"></div>
+      
+      {/* Conteúdo principal */}
+      <div className="relative z-10 w-full max-w-md space-y-8 text-center">
+        
+        {/* Logo + Nome do App */}
+        <div className="space-y-3">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/30 mb-4">
+            <Sparkles className="w-8 h-8 text-white" />
+          </div>
+          
+          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+            Khalwa
+          </h1>
+          
+          <p className="text-indigo-300 text-sm font-medium tracking-wide">
+            Canto Sagrado do Qur'an
+          </p>
         </div>
-        <p className="text-emerald-700 font-medium text-lg">{APP_TAGLINE}</p>
-      </header>
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="max-w-2xl w-full">
-          {step === 0 && (
-            <div className="text-center space-y-8 animate-in fade-in duration-700">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-                Transforme Seu Celular em um{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-amber-600">
-                  Canto Sagrado
-                </span>
-              </h1>
-              
-              <p className="text-xl text-gray-600 max-w-xl mx-auto leading-relaxed">
-                {APP_DESCRIPTION}
-              </p>
-
-              <div className="grid md:grid-cols-3 gap-6 mt-12">
-                {features.map((feature, index) => (
-                  <div 
-                    key={index}
-                    className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                  >
-                    <feature.icon className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-                    <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                    <p className="text-sm text-gray-600">{feature.description}</p>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => router.push('/quiz')}
-                className="mt-12 px-12 py-5 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white text-lg font-bold rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300"
-              >
-                Começar Minha Jornada
-              </button>
-
-              <p className="text-sm text-gray-500 mt-6">
-                ✨ Menos de 60 segundos para personalizar sua experiência
-              </p>
-            </div>
-          )}
+        {/* Frase principal (headline) */}
+        <div className="space-y-4 pt-4">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white leading-tight">
+            Transforme tempo de tela<br />em tempo com Allah
+          </h2>
+          
+          {/* Texto de apoio */}
+          <p className="text-indigo-200/80 text-base leading-relaxed max-w-sm mx-auto">
+            No mesmo aparelho em que você se distrai, agora você terá um espaço reservado só para Qur'an, foco e paz interior.
+          </p>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="p-6 text-center text-sm text-gray-500">
-        <p>Com respeito e reverência ao Livro Sagrado de Allah</p>
-      </footer>
+        {/* Botões de ação */}
+        <div className="space-y-4 pt-8">
+          {/* Botão primário */}
+          <button
+            onClick={() => router.push('/signup')}
+            className="w-full px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-lg font-semibold rounded-2xl hover:from-indigo-600 hover:to-purple-700 active:scale-[0.98] transition-all duration-200 shadow-xl shadow-indigo-500/30"
+          >
+            Criar minha conta
+          </button>
+
+          {/* Botão secundário */}
+          <button
+            onClick={() => router.push('/login')}
+            className="w-full px-8 py-4 bg-white/5 backdrop-blur-sm text-white text-lg font-medium rounded-2xl border border-white/10 hover:bg-white/10 hover:border-white/20 active:scale-[0.98] transition-all duration-200"
+          >
+            Já tenho conta
+          </button>
+        </div>
+
+        {/* Texto de confiança */}
+        <div className="pt-6">
+          <p className="text-indigo-300/60 text-sm">
+            ✨ Sem anúncios. Sem distrações. Só você e o Qur'an.
+          </p>
+        </div>
+      </div>
+
+      {/* Footer discreto */}
+      <div className="absolute bottom-6 left-0 right-0 text-center">
+        <p className="text-indigo-400/40 text-xs">
+          Com respeito e reverência ao Livro Sagrado de Allah
+        </p>
+      </div>
     </div>
   );
 }

@@ -2,143 +2,156 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronRight, ChevronLeft, Sparkles, Check } from 'lucide-react';
+import { ChevronLeft, Check } from 'lucide-react';
 import { QUIZ_QUESTIONS } from '@/lib/constants';
-import { QuizAnswer } from '@/lib/types';
+import type { QuizAnswer } from '@/lib/types';
 
 export default function QuizPage() {
   const router = useRouter();
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<QuizAnswer>>({});
-  const [isAnimating, setIsAnimating] = useState(false);
 
-  const progress = ((currentQuestion + 1) / QUIZ_QUESTIONS.length) * 100;
-  const question = QUIZ_QUESTIONS[currentQuestion];
-  const isLastQuestion = currentQuestion === QUIZ_QUESTIONS.length - 1;
+  const currentQuestion = QUIZ_QUESTIONS[currentStep];
+  const progress = ((currentStep + 1) / QUIZ_QUESTIONS.length) * 100;
+  const isLastStep = currentStep === QUIZ_QUESTIONS.length - 1;
 
   const handleAnswer = (value: any) => {
-    const key = ['language', 'timezone', 'routine', 'level', 'goal', 'dailyTime', 'notifications'][currentQuestion];
-    setAnswers({ ...answers, [key]: value });
+    const questionKey = getQuestionKey(currentQuestion.id);
+    const newAnswers = { ...answers, [questionKey]: value };
+    setAnswers(newAnswers);
 
-    setIsAnimating(true);
+    // Auto-avançar após selecionar
     setTimeout(() => {
-      if (isLastQuestion) {
-        // Salvar respostas no localStorage
-        localStorage.setItem('quizAnswers', JSON.stringify({ ...answers, [key]: value }));
+      if (isLastStep) {
+        // Salvar respostas e ir para resultado
+        localStorage.setItem('quizAnswers', JSON.stringify(newAnswers));
         router.push('/quiz/result');
       } else {
-        setCurrentQuestion(currentQuestion + 1);
-        setIsAnimating(false);
+        setCurrentStep(currentStep + 1);
       }
     }, 300);
   };
 
   const handleBack = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    } else {
+      router.push('/');
     }
   };
 
-  const timeRemaining = Math.max(0, 60 - (currentQuestion * 8));
+  const getQuestionKey = (id: number): keyof QuizAnswer => {
+    const keyMap: Record<number, keyof QuizAnswer> = {
+      1: 'language',
+      2: 'timezone',
+      3: 'routine',
+      4: 'level',
+      5: 'goal',
+      6: 'dailyTime',
+      7: 'notifications'
+    };
+    return keyMap[id];
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-amber-50 flex flex-col">
-      {/* Header com Progress */}
-      <header className="p-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex flex-col">
+      {/* Header com progresso */}
+      <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 z-10">
+        <div className="max-w-2xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-4 mb-3">
             <button
               onClick={handleBack}
-              disabled={currentQuestion === 0}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors disabled:opacity-0"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              aria-label="Voltar"
             >
-              <ChevronLeft className="w-6 h-6 text-gray-600" />
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
-            
-            <div className="text-center">
-              <p className="text-sm font-medium text-emerald-700">
-                Pergunta {currentQuestion + 1} de {QUIZ_QUESTIONS.length}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                ⏱️ ~{timeRemaining}s restantes
-              </p>
+            <div className="flex-1">
+              <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
+                <span>Passo {currentStep + 1} de {QUIZ_QUESTIONS.length}</span>
+                <span className="font-medium">{Math.round(progress)}%</span>
+              </div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
-
-            <div className="w-10" /> {/* Spacer */}
-          </div>
-
-          {/* Progress Bar */}
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
           </div>
         </div>
       </header>
 
-      {/* Question Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-8">
-        <div className={`max-w-2xl w-full transition-all duration-300 ${isAnimating ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 rounded-full mb-6">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-medium text-emerald-700">
-                Personalizando sua experiência
-              </span>
-            </div>
-
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-              {question.question}
+      {/* Conteúdo da pergunta */}
+      <main className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="max-w-lg w-full space-y-8 animate-in fade-in duration-500">
+          
+          {/* Pergunta */}
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              {currentQuestion.question}
             </h2>
-            <p className="text-lg text-gray-600">
-              {question.subtitle}
+            <p className="text-gray-600">
+              {currentQuestion.subtitle}
             </p>
           </div>
 
-          {/* Options */}
-          <div className="space-y-4">
-            {question.options.map((option, index) => (
-              <button
-                key={index}
-                onClick={() => handleAnswer(option.value)}
-                className="w-full p-6 bg-white rounded-2xl shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 text-left group border-2 border-transparent hover:border-emerald-500"
-              >
-                <div className="flex items-center gap-4">
-                  {option.emoji && (
-                    <span className="text-3xl">{option.emoji}</span>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-bold text-gray-900 text-lg group-hover:text-emerald-700 transition-colors">
-                      {option.label}
-                    </p>
-                    {option.description && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {option.description}
-                      </p>
+          {/* Opções */}
+          <div className="space-y-3">
+            {currentQuestion.options.map((option, index) => {
+              const questionKey = getQuestionKey(currentQuestion.id);
+              const isSelected = answers[questionKey] === option.value;
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(option.value)}
+                  className={`
+                    w-full p-5 rounded-xl border-2 text-left transition-all duration-200
+                    ${isSelected 
+                      ? 'border-emerald-600 bg-emerald-50 shadow-md' 
+                      : 'border-gray-200 bg-white hover:border-emerald-300 hover:shadow-sm'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Emoji ou ícone */}
+                    {option.emoji && (
+                      <span className="text-2xl">{option.emoji}</span>
+                    )}
+                    
+                    {/* Conteúdo */}
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">
+                        {option.label}
+                      </div>
+                      {option.description && (
+                        <div className="text-sm text-gray-600 mt-1">
+                          {option.description}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Check icon */}
+                    {isSelected && (
+                      <div className="w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
                     )}
                   </div>
-                  <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
-                </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Motivational Text */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500">
-              {currentQuestion < 3 && "🎯 Estamos quase lá! Continue respondendo..."}
-              {currentQuestion >= 3 && currentQuestion < 6 && "✨ Ótimo! Só mais algumas perguntas..."}
-              {currentQuestion === 6 && "🎉 Última pergunta! Seu plano está quase pronto..."}
+          {/* Motivação */}
+          {currentStep === 0 && (
+            <p className="text-center text-sm text-emerald-600 font-medium">
+              🎯 Você está a {QUIZ_QUESTIONS.length * 10} segundos do seu plano personalizado
             </p>
-          </div>
+          )}
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="p-6 text-center text-xs text-gray-500">
-        <p>Suas respostas são privadas e usadas apenas para personalização</p>
-      </footer>
     </div>
   );
 }
